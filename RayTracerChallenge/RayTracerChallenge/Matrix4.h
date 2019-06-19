@@ -209,6 +209,14 @@ struct Matrix4
 		e[3][3] = e33;
 	}
 
+	Matrix4(Matrix4 &rhs)
+	{
+		for (int i = 0; i < 16; i++)
+		{
+			c[i] = rhs.c[i];
+		}
+	}
+
 	static Matrix4 Identity()
 	{
 		Matrix4 placeholder;

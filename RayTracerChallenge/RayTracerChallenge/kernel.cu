@@ -34,11 +34,14 @@ int mainCUDA(Vec4 vec4Pass)
 		cudaGetDeviceProperties(&deviceProperties, deviceIndex);
 		char* check = deviceProperties.name;
 
-		int test = 0;
+		check = check;
+
+		int test = 1;
+		test++;
 	}
 
 	Vec4 vec4 = vec4Pass;
-	Vec4 vec4New = Vec4{ 1.0f, 5.0f };
+	Vec4 vec4New = Vec4{ 1.0f, 5.0f, 1.0f, 1.0f };
 
 	printf("{%f,%f,%f,%f}\n",
 		vec4.x, vec4.y, vec4New.x, vec4New.y);

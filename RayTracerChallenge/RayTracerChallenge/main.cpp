@@ -1,6 +1,8 @@
 #include "Canvas.h"
 #include "Matrix4.h"
 #include "Vec4.h"
+#include "Ray.h"
+#include "Sphere.h"
 
 int mainCUDA(Vec4 vec4Pass);
 
@@ -68,18 +70,85 @@ int main()
 
 	
 
-	for (int i = 0; i < 12; i++)
+	//for (int i = 0; i < 12; i++)
+	//{
+	//	Vec4 point = Vec4::Point(0.0f, 200.0f, 0.0f);
+	//	point = Matrix4::RotationZ(i * 2.0f * PI / 12.0f).MMult(point);
+	//	point = Matrix4::Translation((float)c.width / 2.0f, (float)c.height / 2.0f, 0.0f).MMult(point);
+	//	c.SetPixel((int)point.x, (int)((float)c.height - point.y), Colorf{ 1.0f, 0.0f, 0.0f });
+	//}
+	//
+	//
+	//c.CreatePPM("chapter4.ppm");
+
+	
+	//Ray ray(Vec4::Point(0.0f, 0.0f, 5.0f), Vec4::Vec(0.0f, 0.0f, 1.0f));
+	//Sphere sphere(0);
+	//
+	//sphere.origin = Vec4::Point(0.0f, 0.0f, 0.0f);
+	//sphere.radius = 1.0f;
+	//
+	//Matrix4 mat2 = Matrix4::Identity();
+	//
+	//Matrix4 mat3 = mat2.Inverse();
+	//
+	//ray.Transform(mat3);
+	//
+	//sphere.Intersect(ray);
+	//
+	//Intersection hit;
+	//
+	//if (ray.intersections.FindAndGetHit(hit))
+	//{
+	//	// do stuff?
+	//}
+
+	//Ray ray(Vec4::Point(1.0f, 2.0f, 3.0f), Vec4::Vec(0.0f, 1.0f, 0.0f));
+	//Matrix4 translation = Matrix4::Translation(3.0f, 4.0f, 5.0f);
+	//Matrix4 scale = Matrix4::Scale(2.0f, 3.0f, 4.0f);
+	//Ray rayTransformed = ray.Transform(scale);
+
+	float viewBoardHalfWidth = 5.0f * (float)c.width / (float)c.height;
+	float viewBoardHalfHeight = 5.0f;
+	Vec4 viewBoardOrigin = Vec4::Point(0.0f, 0.0f, 5.0f);
+
+	Vec4 rayOrigin = Vec4::Point(0.0f, 0.0f, -5.0f);
+
+	Sphere s(0);
+	s.AddTranformation(Matrix4::Scale(0.5f, 1.0f, 1.0f));
+	s.AddTranformation(Matrix4::Shear(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+	
+	int countHits = 0;
+	
+	for (int i = 0; i < c.width; i++)
 	{
-		Vec4 point = Vec4::Point(0.0f, 200.0f, 0.0f);
-		point = Matrix4::RotationZ(i * 2.0f * PI / 12.0f).MMult(point);
-		point = Matrix4::Translation((float)c.width / 2.0f, (float)c.height / 2.0f, 0.0f).MMult(point);
-		c.SetPixel((int)point.x, (int)((float)c.height - point.y), Colorf{ 1.0f, 0.0f, 0.0f });
+		for (int j = 0; j < c.height; j++)
+		{
+			Vec4 viewBoardLoc = viewBoardOrigin + Vec4::Point((float)(((float)i - (float)(c.width / 2)) / (float)(c.width / 2)) * viewBoardHalfWidth, -(float)(((float)j - (float)(c.height / 2)) / (float)(c.height / 2)) * viewBoardHalfHeight, 0.0f);
+
+			Vec4 directionFromRayToViewBoard = viewBoardLoc - rayOrigin;
+	
+			Ray ray(rayOrigin, directionFromRayToViewBoard.Normalize());
+	
+			s.Intersect(ray);
+	
+			Intersection hit;
+	
+			if (ray.intersections.FindAndGetHit(hit))
+			{
+				c.SetPixel(i, j, Colorf{ 1.0f, 0.0f, 0.0f });
+				countHits++;
+			}
+			else
+			{
+				c.SetPixel(i, j, Colorf{ 0.0f, 0.0f, 0.0f });
+			}
+		}
 	}
 	
-	
 
-	c.CreatePPM("chapter4.ppm");
-
-	Vec4 vec4Pass{ 1.0f, 1.0f };
-	mainCUDA(vec4Pass);
+	c.CreatePPM("chapter5.ppm");
+	//
+	//Vec4 vec4Pass{ 1.0f, 1.0f };
+	//mainCUDA(vec4Pass);
 }
