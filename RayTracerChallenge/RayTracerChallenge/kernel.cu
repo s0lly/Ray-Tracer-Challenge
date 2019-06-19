@@ -26,6 +26,17 @@ __global__ void addVec4Kernel(Vec4 *c4, Vec4 *a4, Vec4 *b4)
 
 int mainCUDA(Vec4 vec4Pass)
 {
+	int devicesCount;
+	cudaGetDeviceCount(&devicesCount);
+	for (int deviceIndex = 0; deviceIndex < devicesCount; ++deviceIndex)
+	{
+		cudaDeviceProp deviceProperties;
+		cudaGetDeviceProperties(&deviceProperties, deviceIndex);
+		char* check = deviceProperties.name;
+
+		int test = 0;
+	}
+
 	Vec4 vec4 = vec4Pass;
 	Vec4 vec4New = Vec4{ 1.0f, 5.0f };
 

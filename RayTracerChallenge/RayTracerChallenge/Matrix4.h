@@ -361,6 +361,95 @@ struct Matrix4
 
 		return placeholder;
 	}
+
+	static Matrix4 Translation(float x, float y, float z)
+	{
+		Matrix4 placeholder = Matrix4::Identity();
+		placeholder.e[0][3] = x;
+		placeholder.e[1][3] = y;
+		placeholder.e[2][3] = z;
+		return placeholder;
+	}
+
+	static Matrix4 Scale(float x, float y, float z)
+	{
+		Matrix4 placeholder = Matrix4::Identity();
+		placeholder.e[0][0] = x;
+		placeholder.e[1][1] = y;
+		placeholder.e[2][2] = z;
+		return placeholder;
+	}
+
+	static Matrix4 RotationX(float r)
+	{
+		float cosR = cos(r);
+		float sinR = sin(r);
+
+		Matrix4 placeholder = Matrix4::Identity();
+
+		placeholder.e[1][1] = cosR;
+		placeholder.e[1][2] = -sinR;
+		placeholder.e[2][1] = sinR;
+		placeholder.e[2][2] = cosR;
+
+		return placeholder;
+	}
+
+	static Matrix4 RotationY(float r)
+	{
+		float cosR = cos(r);
+		float sinR = sin(r);
+
+		Matrix4 placeholder = Matrix4::Identity();
+
+		placeholder.e[0][0] = cosR;
+		placeholder.e[0][2] = sinR;
+		placeholder.e[2][0] = -sinR;
+		placeholder.e[2][2] = cosR;
+
+		return placeholder;
+	}
+
+	static Matrix4 RotationZ(float r)
+	{
+		float cosR = cos(r);
+		float sinR = sin(r);
+
+		Matrix4 placeholder = Matrix4::Identity();
+
+		placeholder.e[0][0] = cosR;
+		placeholder.e[0][1] = -sinR;
+		placeholder.e[1][0] = sinR;
+		placeholder.e[1][1] = cosR;
+
+		return placeholder;
+	}
+
+	static Matrix4 Shear(float xByY, float xByZ, float yByX, float yByZ, float zByX, float zByY)
+	{
+		Matrix4 placeholder = Matrix4::Identity();
+
+		placeholder.e[0][1] = xByY;
+		placeholder.e[0][2] = xByZ;
+		placeholder.e[1][0] = yByX;
+		placeholder.e[1][2] = yByZ;
+		placeholder.e[2][0] = zByX;
+		placeholder.e[2][1] = zByY;
+
+		return placeholder;
+	}
+
+	static Matrix4 Transformer(Matrix4 *rhs, int arraySize)
+	{
+		Matrix4 placeholder = Matrix4::Identity();
+
+		for (int i = 0; i < arraySize; i++)
+		{
+			placeholder = rhs[i].MMult(placeholder);
+		}
+
+		return placeholder;
+	}
 };
 
 
