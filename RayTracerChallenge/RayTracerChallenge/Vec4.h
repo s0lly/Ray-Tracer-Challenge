@@ -22,7 +22,7 @@ struct Vec4
 	float y = 0.0f;
 	float z = 0.0f;
 	float w = 0.0f;
-
+	
 
 	// Functions
 
@@ -34,6 +34,19 @@ struct Vec4
 	CUDA_CALLABLE_MEMBER static Vec4 Vec(float a, float b, float c)
 	{
 		return Vec4{ a, b, c, 0.0f };
+	}
+
+
+	float& operator [](int j)
+	{
+		switch (j)
+		{
+		case 0: return x;
+		case 1: return y;
+		case 2: return z;
+		case 3: return w;
+		};
+		return x;
 	}
 
 
@@ -100,6 +113,177 @@ struct Vec4
 			x * rhs.y - y * rhs.x);
 	}
 };
+
+
+
+
+struct Vec3
+{
+	// Data
+	float x = 0.0f;
+	float y = 0.0f;
+	float z = 0.0f;
+
+
+	// Functions
+
+	float& operator [](int j)
+	{
+		switch (j)
+		{
+		case 0: return x;
+		case 1: return y;
+		case 2: return z;
+		};
+		return x;
+	}
+
+
+	CUDA_CALLABLE_MEMBER Vec3 operator +(Vec3 &rhs)
+	{
+		return Vec3{ x + rhs.x, y + rhs.y, z + rhs.z };
+	}
+
+	CUDA_CALLABLE_MEMBER Vec3 operator -(Vec3 &rhs)
+	{
+		return Vec3{ x - rhs.x, y - rhs.y, z - rhs.z };
+	}
+
+	CUDA_CALLABLE_MEMBER Vec3 operator *(Vec3 &rhs)
+	{
+		return Vec3{ x * rhs.x, y * rhs.y, z * rhs.z };
+	}
+
+	CUDA_CALLABLE_MEMBER Vec3 operator *(float rhs)
+	{
+		return Vec3{ x * rhs, y * rhs, z * rhs };
+	}
+
+	CUDA_CALLABLE_MEMBER Vec3 operator /(float rhs)
+	{
+		return Vec3{ x / rhs, y / rhs, z / rhs };
+	}
+
+	CUDA_CALLABLE_MEMBER Vec3 operator -()
+	{
+		return Vec3{ -x, -y, -z };
+	}
+
+	CUDA_CALLABLE_MEMBER bool operator ==(Vec3 &rhs)
+	{
+		return Equiv(x, rhs.x) && Equiv(y, rhs.y) && Equiv(z, rhs.z);
+	}
+
+	CUDA_CALLABLE_MEMBER float MagnitudeSqrd()
+	{
+		return (x * x + y * y + z * z);
+	}
+
+	CUDA_CALLABLE_MEMBER float Magnitude()
+	{
+		return sqrt(MagnitudeSqrd());
+	}
+
+	CUDA_CALLABLE_MEMBER Vec3 Normalize()
+	{
+		return ((*this) / Magnitude());
+	}
+
+	CUDA_CALLABLE_MEMBER float Dot(Vec3 &rhs)
+	{
+		return (x * rhs.x + y * rhs.y + z * rhs.z);
+	}
+
+	CUDA_CALLABLE_MEMBER Vec3 Cross(Vec3 &rhs)
+	{
+		return Vec3{
+			y * rhs.z - z * rhs.y,
+			z * rhs.x - x * rhs.z,
+			x * rhs.y - y * rhs.x };
+	}
+};
+
+
+
+
+
+struct Vec2
+{
+	// Data
+	float x = 0.0f;
+	float y = 0.0f;
+
+
+	// Functions
+
+	float& operator [](int j)
+	{
+		switch (j)
+		{
+		case 0: return x;
+		case 1: return y;
+		};
+		return x;
+	}
+
+
+	CUDA_CALLABLE_MEMBER Vec2 operator +(Vec2 &rhs)
+	{
+		return Vec2{ x + rhs.x, y + rhs.y };
+	}
+
+	CUDA_CALLABLE_MEMBER Vec2 operator -(Vec2 &rhs)
+	{
+		return Vec2{ x - rhs.x, y - rhs.y };
+	}
+
+	CUDA_CALLABLE_MEMBER Vec2 operator *(Vec2 &rhs)
+	{
+		return Vec2{ x * rhs.x, y * rhs.y };
+	}
+
+	CUDA_CALLABLE_MEMBER Vec2 operator *(float rhs)
+	{
+		return Vec2{ x * rhs, y * rhs };
+	}
+
+	CUDA_CALLABLE_MEMBER Vec2 operator /(float rhs)
+	{
+		return Vec2{ x / rhs, y / rhs };
+	}
+
+	CUDA_CALLABLE_MEMBER Vec2 operator -()
+	{
+		return Vec2{ -x, -y };
+	}
+
+	CUDA_CALLABLE_MEMBER bool operator ==(Vec2 &rhs)
+	{
+		return Equiv(x, rhs.x) && Equiv(y, rhs.y);
+	}
+
+	CUDA_CALLABLE_MEMBER float MagnitudeSqrd()
+	{
+		return (x * x + y * y);
+	}
+
+	CUDA_CALLABLE_MEMBER float Magnitude()
+	{
+		return sqrt(MagnitudeSqrd());
+	}
+
+	CUDA_CALLABLE_MEMBER Vec2 Normalize()
+	{
+		return ((*this) / Magnitude());
+	}
+
+	CUDA_CALLABLE_MEMBER float Dot(Vec2 &rhs)
+	{
+		return (x * rhs.x + y * rhs.y);
+	}
+};
+
+
 
 
 struct Colorf
