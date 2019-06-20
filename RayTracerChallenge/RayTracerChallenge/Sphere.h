@@ -19,16 +19,27 @@ struct Sphere
 	float radius;
 	int id;
 	Matrix4 tranformationToWorldSpace;
+	Matrix4 inverseTranformationToWorldSpace;
 	Material material;
 
 
 	// Functions
+	CUDA_CALLABLE_MEMBER Sphere()
+	{
+		origin = Vec4::Point(0.0f, 0.0f, 0.0f);
+		radius = 1.0f;
+		id = -1;
+		tranformationToWorldSpace = Matrix4::Identity();
+		inverseTranformationToWorldSpace = Matrix4::Identity();
+	}
+
 	CUDA_CALLABLE_MEMBER Sphere(int in_id)
 	{
 		origin = Vec4::Point(0.0f, 0.0f, 0.0f);
 		radius = 1.0f;
 		id = in_id;
 		tranformationToWorldSpace = Matrix4::Identity();
+		inverseTranformationToWorldSpace = Matrix4::Identity();
 	}
 
 	CUDA_CALLABLE_MEMBER Sphere(Vec4 in_origin, float in_radius, int in_id)
@@ -60,9 +71,9 @@ struct Sphere
 			if (discriminant >= 0.0f)
 			{
 				float t = (-b - sqrt(discriminant)) / (2.0f * a);
-				ray.intersections.AddIntersection(t, id);
+				ray.intersections.AddIntersection(t, this);
 				t = (-b + sqrt(discriminant)) / (2.0f * a);
-				ray.intersections.AddIntersection(t, id);
+				ray.intersections.AddIntersection(t, this);
 			}
 		}
 	}
@@ -70,14 +81,18 @@ struct Sphere
 	CUDA_CALLABLE_MEMBER void AddTranformation(Matrix4 &rhs)
 	{
 		tranformationToWorldSpace = rhs.MMult(tranformationToWorldSpace);
+		if (tranformationToWorldSpace.IsInvertible())
+		{
+			inverseTranformationToWorldSpace = tranformationToWorldSpace.Inverse();
+		}
+		
 	}
 
 	CUDA_CALLABLE_MEMBER Vec4 GetNormal(Vec4 p)
 	{
-		Matrix4 inverseTransformToWS = tranformationToWorldSpace.Inverse();
-		Vec4 objectSpacePoint = inverseTransformToWS.MMult(p);
+		Vec4 objectSpacePoint = inverseTranformationToWorldSpace.MMult(p);
 		Vec4 objectSpaceNormal = objectSpacePoint - origin;
-		Vec4 worldSpaceNormal = inverseTransformToWS.Transpose().MMult(objectSpaceNormal);
+		Vec4 worldSpaceNormal = inverseTranformationToWorldSpace.Transpose().MMult(objectSpaceNormal);
 		worldSpaceNormal.w = 0.0f;
 		return worldSpaceNormal.Normalize();
 	}

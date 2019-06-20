@@ -8,26 +8,27 @@
 #define CUDA_CALLABLE_MEMBER
 #endif
 
+struct Sphere;
 
 
 struct Intersection
 {
 	// Data
 	float t;
-	int objID;
+	Sphere *obj;
 
 
 	// Functions
 	CUDA_CALLABLE_MEMBER Intersection()
 	{
 		t = 0.0f;
-		objID = -1.0f;
+		obj = nullptr;
 	}
 
-	CUDA_CALLABLE_MEMBER Intersection(float in_t, int in_objID)
+	CUDA_CALLABLE_MEMBER Intersection(float in_t, Sphere *in_obj)
 	{
 		t = in_t;
-		objID = in_objID;
+		obj = in_obj;
 	}
 };
 
@@ -53,9 +54,9 @@ struct IntersectionList
 	//}
 
 
-	CUDA_CALLABLE_MEMBER void AddIntersection(float in_t, int in_objID)
+	CUDA_CALLABLE_MEMBER void AddIntersection(float in_t, Sphere *in_obj)
 	{
-		list[currentNum] = Intersection(in_t, in_objID);
+		list[currentNum] = Intersection(in_t, in_obj);
 		currentNum++;
 	}
 
@@ -81,6 +82,22 @@ struct IntersectionList
 		}
 
 		return foundHit;
+	}
+
+	CUDA_CALLABLE_MEMBER void Sort()
+	{
+		for (int j = 0; j < currentNum - 1; j++)
+		{
+			for (int i = 0; i < currentNum - 1 - j; i++)
+			{
+				if (list[i].t > list[i + 1].t)
+				{
+					Intersection placeholder = list[i];
+					list[i] = list[i + 1];
+					list[i + 1] = placeholder;
+				}
+			}
+		}
 	}
 };
 

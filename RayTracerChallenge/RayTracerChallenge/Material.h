@@ -23,6 +23,7 @@ struct Material
 
 	CUDA_CALLABLE_MEMBER Material()
 	{
+		color = Colorf{ 1.0f, 1.0, 1.0f };
 		ambient = 0.1f;
 		diffuse = 0.9f;
 		specular = 0.9f;
@@ -33,9 +34,9 @@ struct Material
 	CUDA_CALLABLE_MEMBER Colorf Lighting(PointLight &p, Vec4 &pos, Vec4 &eyeVec, Vec4 &normalVec)
 	{
 		Colorf effectiveColor = color * p.color;
-		effectiveColor.r *= (pos.Normalize().x + 1.0f) / 2.0f;
-		effectiveColor.g *= (pos.Normalize().y + 1.0f) / 2.0f;
-		effectiveColor.b *= (pos.Normalize().z + 1.0f) / 2.0f;
+		//effectiveColor.r *= (pos.Normalize().x + 1.0f) / 2.0f;
+		//effectiveColor.g *= (pos.Normalize().y + 1.0f) / 2.0f;
+		//effectiveColor.b *= (pos.Normalize().z + 1.0f) / 2.0f;
 		Colorf ambientColor = Colorf{ 0.0f, 0.0f, 0.0f };
 		Colorf diffuseColor = Colorf{ 0.0f, 0.0f, 0.0f };
 		Colorf specularColor = Colorf{ 0.0f, 0.0f, 0.0f };

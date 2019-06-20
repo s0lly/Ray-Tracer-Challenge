@@ -17,6 +17,7 @@ struct PointLight
 
 
 	// Functions
+	CUDA_CALLABLE_MEMBER PointLight() {}
 
 	CUDA_CALLABLE_MEMBER PointLight(Vec4 pos, Colorf inten)
 	{

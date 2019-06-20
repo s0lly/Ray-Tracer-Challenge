@@ -3,6 +3,8 @@
 #include "Vec4.h"
 #include "Ray.h"
 #include "Sphere.h"
+#include "World.h"
+#include "ComputeInfo.h""
 
 #include <cuda_runtime.h>
 
@@ -116,15 +118,51 @@ int main()
 	//Ray rayTransformed = ray.Transform(scale);
 
 
-
-	//Canvas c(1600, 900);
-
-	//float viewBoardHalfWidth = 5.0f * (float)c.width / (float)c.height;
-	//float viewBoardHalfHeight = 5.0f;
-	//Vec4 viewBoardOrigin = Vec4::Point(0.0f, 0.0f, 10.0f);
+	//Sphere s(0);
 	//
-	//Vec4 rayOrigin = Vec4::Point(0.0f, 0.0f, -5.0f);
+	//s.AddTranformation(Matrix4::RotationZ(PI / sqrt(5.0f)));
+	//s.AddTranformation(Matrix4::Scale(1.0f, 0.5f, 1.0f));
 	//
+	//Vec4 normalTest = s.GetNormal(Vec4::Point(0.0f, -sqrt(2.0f) / 2.0f, sqrt(2.0f) / 2.0f));
+
+
+	//World world;
+	//Ray ray(Vec4::Point(0.0f, 0.0f, 0.75f), Vec4::Vec(0.0f, 0.0f, -1.0f));
+	//world.spheres[0].material.ambient = 1.0f;
+	//world.spheres[1].material.ambient = 1.0f;
+	//
+	//Colorf color = world.ColorAt(ray);
+
+	//world.pointLights[0] = PointLight(Vec4::Point(0.0f, 0.25f, 0.0f), Colorf{ 1.0f, 1.0f, 1.0f });
+	//
+	//Intersection i(0.5f, &world.spheres[1]);
+	//
+	//ComputeInfo compInfo;
+	//compInfo.Prepare(i, ray);
+	//
+	//Colorf color = world.ShadeHit(compInfo);
+
+	//world.Intersect(ray);
+
+
+
+
+
+
+
+
+	Canvas c(1600, 900);
+	
+	float viewBoardHalfWidth = 5.0f * (float)c.width / (float)c.height;
+	float viewBoardHalfHeight = 5.0f;
+	Vec4 viewBoardOrigin = Vec4::Point(0.0f, 0.0f, 10.0f);
+	
+	Vec4 rayOrigin = Vec4::Point(0.0f, 0.0f, -5.0f);
+	
+	World world;
+
+	world.spheres[1].AddTranformation(Matrix4::Translation(-0.5f, 0.0f, -0.5f));
+	world.spheres[1].material.color.g = 0.2f;
 	//Sphere s(0);
 	//s.material.color = Colorf{ 1.0f, 0.2f, 1.0f };
 	//
@@ -132,53 +170,34 @@ int main()
 	//
 	//s.AddTranformation(Matrix4::Scale(0.5f, 1.0f, 1.0f));
 	//s.AddTranformation(Matrix4::RotationY(PI / 2.0f));
-	//
-	//
-	//
-	//int countHits = 0;
-	//
-	//for (int i = 0; i < c.width; i++)
-	//{
-	//	for (int j = 0; j < c.height; j++)
-	//	{
-	//		Vec4 viewBoardLoc = viewBoardOrigin + Vec4::Point((float)(((float)i - (float)(c.width / 2)) / (float)(c.width / 2)) * viewBoardHalfWidth, -(float)(((float)j - (float)(c.height / 2)) / (float)(c.height / 2)) * viewBoardHalfHeight, 0.0f);
-	//
-	//		Vec4 directionFromRayToViewBoard = viewBoardLoc - rayOrigin;
-	//
-	//		Ray ray(rayOrigin, directionFromRayToViewBoard.Normalize());
-	//
-	//		s.Intersect(ray);
-	//
-	//		Intersection hit;
-	//
-	//		if (ray.intersections.FindAndGetHit(hit))
-	//		{
-	//			Vec4 positionOnSphere = ray.Position(hit.t);
-	//			Colorf color = s.material.Lighting(light, ray.Position(hit.t), ray.origin - positionOnSphere, s.GetNormal(positionOnSphere));
-	//			c.SetPixel(i, j, color);
-	//			countHits++;
-	//		}
-	//		else
-	//		{
-	//			c.SetPixel(i, j, Colorf{ 0.0f, 0.0f, 0.0f });
-	//		}
-	//	}
-	//}
-
-	//Sphere s(0);
-	//
-	//s.AddTranformation(Matrix4::RotationZ(PI / sqrt(5.0f)));
-	//s.AddTranformation(Matrix4::Scale(1.0f, 0.5f, 1.0f));
-	//
-	//Vec4 normalTest = s.GetNormal(Vec4::Point(0.0f, -sqrt(2.0f) / 2.0f, sqrt(2.0f) / 2.0f));
+	
+	
+	int countHits = 0;
+	
+	for (int i = 0; i < c.width; i++)
+	{
+		for (int j = 0; j < c.height; j++)
+		{
+			Vec4 viewBoardLoc = viewBoardOrigin + Vec4::Point((float)(((float)i - (float)(c.width / 2)) / (float)(c.width / 2)) * viewBoardHalfWidth, -(float)(((float)j - (float)(c.height / 2)) / (float)(c.height / 2)) * viewBoardHalfHeight, 0.0f);
+	
+			Vec4 directionFromRayToViewBoard = viewBoardLoc - rayOrigin;
+	
+			Ray ray(rayOrigin, directionFromRayToViewBoard.Normalize());
+	
+			Colorf color = world.ColorAt(ray);
+	
+			c.SetPixel(i, j, color);
+		}
+	}
+	
+	
+	c.CreatePPM("chapter7test.ppm");
 	
 
 	int testcheck = 0;
 
 	
-	//
-	
-	mainCUDA();
+	//mainCUDA();
 
 	
 }
