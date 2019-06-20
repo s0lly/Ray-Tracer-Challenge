@@ -4,7 +4,9 @@
 #include "Ray.h"
 #include "Sphere.h"
 
-int mainCUDA(Vec4 vec4Pass);
+#include <cuda_runtime.h>
+
+extern "C" int mainCUDA(Vec4 vec4Pass);
 
 
 struct Projectile
@@ -30,6 +32,11 @@ static Projectile Tick(Environment &env, Projectile &proj)
 
 int main()
 {
+	//float *test;
+	//cudaMallocManaged(&test, 100 * sizeof(float));
+
+
+
 	
 	//Matrix4 mat = {3.0f, -9.0f, 7.0f, 3.0f, 3.0f, -8.0f, 2.0f, -9.0f, -4.0f, 4.0f, 4.0f, 1.0f, -6.0f, 5.0f, -1.0f, 1.0f };
 	//Matrix4 mat2 = { 8.0f, 2.0f, 2.0f, 2.0f, 3.0f, -1.0f, 7.0f, 0.0f, 7.0f, 0.0f, 5.0f, 4.0f, 6.0f, -2.0f, 0.0f, 5.0f };
@@ -50,7 +57,7 @@ int main()
 	//Projectile p = Projectile{ Vec4::Point(0.0f, 1.0f, 0.0f), Vec4::Vec(1.0f, 1.5f, 0.0f).Normalize() * 10.0f };
 	//Environment e = Environment{ Vec4::Vec(0.0f, -0.1f, 0.0f), Vec4::Vec(-0.01f, 0.0f, 0.0f) };
 	//
-	Canvas c(900, 550);
+	Canvas c(1600, 900);
 	//
 	//int tickNum = 0;
 	//
@@ -110,13 +117,19 @@ int main()
 
 	float viewBoardHalfWidth = 5.0f * (float)c.width / (float)c.height;
 	float viewBoardHalfHeight = 5.0f;
-	Vec4 viewBoardOrigin = Vec4::Point(0.0f, 0.0f, 5.0f);
-
+	Vec4 viewBoardOrigin = Vec4::Point(0.0f, 0.0f, 10.0f);
+	
 	Vec4 rayOrigin = Vec4::Point(0.0f, 0.0f, -5.0f);
-
+	
 	Sphere s(0);
+	s.material.color = Colorf{ 1.0f, 0.2f, 1.0f };
+
+	PointLight light(Vec4::Point(-10.0f, 10.0f, -10.0), Colorf{ 1.0f, 1.0f, 1.0f });
+
 	s.AddTranformation(Matrix4::Scale(0.5f, 1.0f, 1.0f));
-	s.AddTranformation(Matrix4::Shear(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+	s.AddTranformation(Matrix4::RotationY(PI / 2.0f));
+	
+	
 	
 	int countHits = 0;
 	
@@ -125,7 +138,7 @@ int main()
 		for (int j = 0; j < c.height; j++)
 		{
 			Vec4 viewBoardLoc = viewBoardOrigin + Vec4::Point((float)(((float)i - (float)(c.width / 2)) / (float)(c.width / 2)) * viewBoardHalfWidth, -(float)(((float)j - (float)(c.height / 2)) / (float)(c.height / 2)) * viewBoardHalfHeight, 0.0f);
-
+	
 			Vec4 directionFromRayToViewBoard = viewBoardLoc - rayOrigin;
 	
 			Ray ray(rayOrigin, directionFromRayToViewBoard.Normalize());
@@ -136,7 +149,9 @@ int main()
 	
 			if (ray.intersections.FindAndGetHit(hit))
 			{
-				c.SetPixel(i, j, Colorf{ 1.0f, 0.0f, 0.0f });
+				Vec4 positionOnSphere = ray.Position(hit.t);
+				Colorf color = s.material.Lighting(light, ray.Position(hit.t), ray.origin - positionOnSphere, s.GetNormal(positionOnSphere));
+				c.SetPixel(i, j, color);
 				countHits++;
 			}
 			else
@@ -145,9 +160,18 @@ int main()
 			}
 		}
 	}
+
+	//Sphere s(0);
+	//
+	//s.AddTranformation(Matrix4::RotationZ(PI / sqrt(5.0f)));
+	//s.AddTranformation(Matrix4::Scale(1.0f, 0.5f, 1.0f));
+	//
+	//Vec4 normalTest = s.GetNormal(Vec4::Point(0.0f, -sqrt(2.0f) / 2.0f, sqrt(2.0f) / 2.0f));
 	
 
-	c.CreatePPM("chapter5.ppm");
+	int testcheck = 0;
+
+	c.CreatePPM("chapter6.ppm");
 	//
 	//Vec4 vec4Pass{ 1.0f, 1.0f };
 	//mainCUDA(vec4Pass);

@@ -51,9 +51,17 @@ struct Canvas
 
 		for (int j = 0; j <width * height; j++)
 		{
-			outfile << std::to_string((unsigned char)(int)(pixels[j].r * 255.999f)) + " " +
-				std::to_string((unsigned char)(int)(pixels[j].g * 255.999f)) + " " +
-				std::to_string((unsigned char)(int)(pixels[j].b * 255.999f)) + "\n";
+			int r = (int)(pixels[j].r * 255.999f);
+			int g = (int)(pixels[j].g * 255.999f);
+			int b = (int)(pixels[j].b * 255.999f);
+
+			r = r > 255 ? 255 : r;
+			g = g > 255 ? 255 : g;
+			b = b > 255 ? 255 : b;
+
+			outfile <<	std::to_string(r) + " " +
+						std::to_string(g) + " " +
+						std::to_string(b) + "\n";
 		}
 		
 	}

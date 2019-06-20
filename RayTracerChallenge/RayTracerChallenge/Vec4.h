@@ -19,13 +19,37 @@ CUDA_CALLABLE_MEMBER static bool Equiv(float a, float b)
 struct Vec4
 {
 	// Data
-	float x = 0.0f;
-	float y = 0.0f;
-	float z = 0.0f;
-	float w = 0.0f;
+	float x;
+	float y;
+	float z;
+	float w;
 	
 
 	// Functions
+
+	CUDA_CALLABLE_MEMBER Vec4()
+	{
+		x = 0.0f;
+		y = 0.0f;
+		z = 0.0f;
+		w = 0.0f;
+	}
+
+	CUDA_CALLABLE_MEMBER Vec4(float a, float b, float c, float d)
+	{
+		x = a;
+		y = b;
+		z = c;
+		w = d;
+	}
+
+	CUDA_CALLABLE_MEMBER Vec4(Vec4 &rhs)
+	{
+		x = rhs.x;
+		y = rhs.y;
+		z = rhs.z;
+		w = rhs.w;
+	}
 
 	CUDA_CALLABLE_MEMBER static Vec4 Point(float a, float b, float c)
 	{
@@ -112,6 +136,12 @@ struct Vec4
 			y * rhs.z - z * rhs.y,
 			z * rhs.x - x * rhs.z,
 			x * rhs.y - y * rhs.x);
+	}
+
+	CUDA_CALLABLE_MEMBER Vec4 GetReflectionOff(Vec4 &normal)
+	{
+		
+		return *this - normal * 2.0f * Dot(normal);
 	}
 };
 

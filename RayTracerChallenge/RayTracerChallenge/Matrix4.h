@@ -2,6 +2,16 @@
 
 #include "Vec4.h"
 
+enum TRANFORM_TYPE
+{
+	TRANSLATE,
+	ROTATE_X,
+	ROTATE_Y,
+	ROTATE_Z,
+	SCALE,
+	SHEAR
+};
+
 struct Matrix2
 {
 	// Data
@@ -111,22 +121,21 @@ struct Matrix3
 
 		int iDest = 0;
 
-		for (int i = 0; i < 3; i++, iDest++)
+		for (int i = 0; i < 3; i++)
 		{
-			if (i == iSkip)
+			if (i != iSkip)
 			{
-				i++;
-			}
+				int jDest = 0;
 
-			int jDest = 0;
-
-			for (int j = 0; j < 3; j++, jDest++)
-			{
-				if (j == jSkip)
+				for (int j = 0; j < 3; j++)
 				{
-					j++;
+					if (j != jSkip)
+					{
+						placeholder.e[iDest][jDest] = e[i][j];
+						jDest++;
+					}
 				}
-				placeholder.e[iDest][jDest] = e[i][j];
+				iDest++;
 			}
 		}
 
@@ -305,22 +314,21 @@ struct Matrix4
 
 		int iDest = 0;
 
-		for (int i = 0; i < 4; i++, iDest++)
+		for (int i = 0; i < 4; i++)
 		{
-			if (i == iSkip)
+			if (i != iSkip)
 			{
-				i++;
-			}
+				int jDest = 0;
 
-			int jDest = 0;
-			
-			for (int j = 0; j < 4; j++, jDest++)
-			{
-				if (j == jSkip)
+				for (int j = 0; j < 4; j++)
 				{
-					j++;
+					if (j != jSkip)
+					{
+						placeholder.e[iDest][jDest] = e[i][j];
+						jDest++;
+					}
 				}
-				placeholder.e[iDest][jDest] = e[i][j];
+				iDest++;
 			}
 		}
 
