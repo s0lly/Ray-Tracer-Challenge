@@ -62,7 +62,7 @@ struct Vec4
 	}
 
 
-	float& operator [](int j)
+	CUDA_CALLABLE_MEMBER float& operator [](int j)
 	{
 		switch (j)
 		{
@@ -158,7 +158,7 @@ struct Vec3
 
 	// Functions
 
-	float& operator [](int j)
+	CUDA_CALLABLE_MEMBER float& operator [](int j)
 	{
 		switch (j)
 		{

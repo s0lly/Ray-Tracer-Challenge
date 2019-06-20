@@ -2,15 +2,21 @@
 
 #include "Vec4.h"
 
-enum TRANFORM_TYPE
-{
-	TRANSLATE,
-	ROTATE_X,
-	ROTATE_Y,
-	ROTATE_Z,
-	SCALE,
-	SHEAR
-};
+#ifdef __CUDACC__
+#define CUDA_CALLABLE_MEMBER __host__ __device__
+#else
+#define CUDA_CALLABLE_MEMBER
+#endif
+
+//CUDA_CALLABLE_MEMBER enum TRANFORM_TYPE
+//{
+//	TRANSLATE,
+//	ROTATE_X,
+//	ROTATE_Y,
+//	ROTATE_Z,
+//	SCALE,
+//	SHEAR
+//};
 
 struct Matrix2
 {
@@ -26,7 +32,7 @@ struct Matrix2
 
 	// Functions
 
-	Matrix2()
+	CUDA_CALLABLE_MEMBER Matrix2()
 	{
 		for (int i = 0; i < 4; i++)
 		{
@@ -34,7 +40,7 @@ struct Matrix2
 		}
 	}
 
-	Matrix2(float e00, float e01,
+	CUDA_CALLABLE_MEMBER Matrix2(float e00, float e01,
 		float e10, float e11)
 	{
 		e[0][0] = e00;
@@ -44,7 +50,7 @@ struct Matrix2
 		e[1][1] = e11;
 	}
 
-	bool operator ==(Matrix2 &rhs)
+	CUDA_CALLABLE_MEMBER bool operator ==(Matrix2 &rhs)
 	{
 		bool check = true;
 		for (int i = 0; i < 4; i++)
@@ -54,12 +60,12 @@ struct Matrix2
 		return check;
 	}
 
-	float Determinant()
+	CUDA_CALLABLE_MEMBER float Determinant()
 	{
 		return e[0][0] * e[1][1] - e[0][1] * e[1][0];
 	}
 
-	bool IsInvertible()
+	CUDA_CALLABLE_MEMBER bool IsInvertible()
 	{
 		return (Determinant() != 0);
 	}
@@ -80,7 +86,7 @@ struct Matrix3
 
 	// Functions
 
-	Matrix3()
+	CUDA_CALLABLE_MEMBER Matrix3()
 	{
 		for (int i = 0; i < 9; i++)
 		{
@@ -88,7 +94,7 @@ struct Matrix3
 		}
 	}
 
-	Matrix3(float e00, float e01, float e02,
+	CUDA_CALLABLE_MEMBER Matrix3(float e00, float e01, float e02,
 		float e10, float e11, float e12,
 		float e20, float e21, float e22)
 	{
@@ -105,7 +111,7 @@ struct Matrix3
 		e[2][2] = e22;
 	}
 
-	bool operator ==(Matrix3 &rhs)
+	CUDA_CALLABLE_MEMBER bool operator ==(Matrix3 &rhs)
 	{
 		bool check = true;
 		for (int i = 0; i < 9; i++)
@@ -115,7 +121,7 @@ struct Matrix3
 		return check;
 	}
 
-	Matrix2 Submatrix(int iSkip, int jSkip)
+	CUDA_CALLABLE_MEMBER Matrix2 Submatrix(int iSkip, int jSkip)
 	{
 		Matrix2 placeholder;
 
@@ -143,18 +149,18 @@ struct Matrix3
 	}
 
 
-	float Minor(int i, int j)
+	CUDA_CALLABLE_MEMBER float Minor(int i, int j)
 	{
 		return Submatrix(i, j).Determinant();
 	}
 
-	float Cofactor(int i, int j)
+	CUDA_CALLABLE_MEMBER float Cofactor(int i, int j)
 	{
 		float signOfMinor = (((i + j) % 2 == 0) ? 1.0f : -1.0f);
 		return signOfMinor * Minor(i, j);
 	}
 
-	float Determinant()
+	CUDA_CALLABLE_MEMBER float Determinant()
 	{
 		float cof0 = Cofactor(0, 0);
 		float cof1 = Cofactor(0, 1);
@@ -163,7 +169,7 @@ struct Matrix3
 		return rows[0].Dot(Vec3{ cof0, cof1, cof2 });
 	}
 
-	bool IsInvertible()
+	CUDA_CALLABLE_MEMBER bool IsInvertible()
 	{
 		return (Determinant() != 0);
 	}
@@ -184,7 +190,7 @@ struct Matrix4
 
 	// Functions
 
-	Matrix4()
+	CUDA_CALLABLE_MEMBER Matrix4()
 	{
 		for (int i = 0; i < 16; i++)
 		{
@@ -192,7 +198,7 @@ struct Matrix4
 		}
 	}
 
-	Matrix4(float e00, float e01, float e02, float e03,
+	CUDA_CALLABLE_MEMBER Matrix4(float e00, float e01, float e02, float e03,
 		float e10, float e11, float e12, float e13,
 		float e20, float e21, float e22, float e23,
 		float e30, float e31, float e32, float e33)
@@ -218,7 +224,7 @@ struct Matrix4
 		e[3][3] = e33;
 	}
 
-	Matrix4(Matrix4 &rhs)
+	CUDA_CALLABLE_MEMBER Matrix4(Matrix4 &rhs)
 	{
 		for (int i = 0; i < 16; i++)
 		{
@@ -226,7 +232,7 @@ struct Matrix4
 		}
 	}
 
-	static Matrix4 Identity()
+	CUDA_CALLABLE_MEMBER static Matrix4 Identity()
 	{
 		Matrix4 placeholder;
 
@@ -248,7 +254,7 @@ struct Matrix4
 		return placeholder;
 	}
 
-	bool operator ==(Matrix4 &rhs)
+	CUDA_CALLABLE_MEMBER bool operator ==(Matrix4 &rhs)
 	{
 		bool check = true;
 		for (int i = 0; i < 16; i++)
@@ -258,7 +264,7 @@ struct Matrix4
 		return check;
 	}
 
-	Vec4 Col(int i)
+	CUDA_CALLABLE_MEMBER Vec4 Col(int i)
 	{
 		return Vec4{e[0][i],
 					e[1][i],
@@ -266,7 +272,7 @@ struct Matrix4
 					e[3][i]};
 	}
 
-	Matrix4 MMult(Matrix4 &rhs)
+	CUDA_CALLABLE_MEMBER Matrix4 MMult(Matrix4 &rhs)
 	{
 		Matrix4 placeholder;
 
@@ -281,7 +287,7 @@ struct Matrix4
 		return placeholder;
 	}
 
-	Vec4 MMult(Vec4 &rhs)
+	CUDA_CALLABLE_MEMBER Vec4 MMult(Vec4 &rhs)
 	{
 		Vec4 placeholder;
 
@@ -293,7 +299,7 @@ struct Matrix4
 		return placeholder;
 	}
 
-	Matrix4 Transpose()
+	CUDA_CALLABLE_MEMBER Matrix4 Transpose()
 	{
 		Matrix4 placeholder;
 
@@ -308,7 +314,7 @@ struct Matrix4
 		return placeholder;
 	}
 
-	Matrix3 Submatrix(int iSkip, int jSkip)
+	CUDA_CALLABLE_MEMBER Matrix3 Submatrix(int iSkip, int jSkip)
 	{
 		Matrix3 placeholder;
 
@@ -335,18 +341,18 @@ struct Matrix4
 		return placeholder;
 	}
 
-	float Minor(int i, int j)
+	CUDA_CALLABLE_MEMBER float Minor(int i, int j)
 	{
 		return Submatrix(i, j).Determinant();
 	}
 
-	float Cofactor(int i, int j)
+	CUDA_CALLABLE_MEMBER float Cofactor(int i, int j)
 	{
 		float signOfMinor = (((i + j) % 2 == 0) ? 1.0f : -1.0f);
 		return signOfMinor * Minor(i, j);
 	}
 
-	float Determinant()
+	CUDA_CALLABLE_MEMBER float Determinant()
 	{
 		float cof0 = Cofactor(0, 0);
 		float cof1 = Cofactor(0, 1);
@@ -356,12 +362,12 @@ struct Matrix4
 		return rows[0].Dot(Vec4{ cof0, cof1, cof2, cof3 });
 	}
 
-	bool IsInvertible()
+	CUDA_CALLABLE_MEMBER bool IsInvertible()
 	{
 		return (Determinant() != 0);
 	}
 
-	Matrix4 Inverse()
+	CUDA_CALLABLE_MEMBER Matrix4 Inverse()
 	{
 		Matrix4 placeholder;
 
@@ -378,7 +384,7 @@ struct Matrix4
 		return placeholder;
 	}
 
-	static Matrix4 Translation(float x, float y, float z)
+	CUDA_CALLABLE_MEMBER static Matrix4 Translation(float x, float y, float z)
 	{
 		Matrix4 placeholder = Matrix4::Identity();
 		placeholder.e[0][3] = x;
@@ -387,7 +393,7 @@ struct Matrix4
 		return placeholder;
 	}
 
-	static Matrix4 Scale(float x, float y, float z)
+	CUDA_CALLABLE_MEMBER static Matrix4 Scale(float x, float y, float z)
 	{
 		Matrix4 placeholder = Matrix4::Identity();
 		placeholder.e[0][0] = x;
@@ -396,7 +402,7 @@ struct Matrix4
 		return placeholder;
 	}
 
-	static Matrix4 RotationX(float r)
+	CUDA_CALLABLE_MEMBER static Matrix4 RotationX(float r)
 	{
 		float cosR = cos(r);
 		float sinR = sin(r);
@@ -411,7 +417,7 @@ struct Matrix4
 		return placeholder;
 	}
 
-	static Matrix4 RotationY(float r)
+	CUDA_CALLABLE_MEMBER static Matrix4 RotationY(float r)
 	{
 		float cosR = cos(r);
 		float sinR = sin(r);
@@ -426,7 +432,7 @@ struct Matrix4
 		return placeholder;
 	}
 
-	static Matrix4 RotationZ(float r)
+	CUDA_CALLABLE_MEMBER static Matrix4 RotationZ(float r)
 	{
 		float cosR = cos(r);
 		float sinR = sin(r);
@@ -441,7 +447,7 @@ struct Matrix4
 		return placeholder;
 	}
 
-	static Matrix4 Shear(float xByY, float xByZ, float yByX, float yByZ, float zByX, float zByY)
+	CUDA_CALLABLE_MEMBER static Matrix4 Shear(float xByY, float xByZ, float yByX, float yByZ, float zByX, float zByY)
 	{
 		Matrix4 placeholder = Matrix4::Identity();
 
@@ -455,7 +461,7 @@ struct Matrix4
 		return placeholder;
 	}
 
-	static Matrix4 Transformer(Matrix4 *rhs, int arraySize)
+	CUDA_CALLABLE_MEMBER static Matrix4 Transformer(Matrix4 *rhs, int arraySize)
 	{
 		Matrix4 placeholder = Matrix4::Identity();
 

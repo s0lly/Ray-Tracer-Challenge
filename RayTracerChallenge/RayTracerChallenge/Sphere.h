@@ -1,8 +1,16 @@
 #pragma once
 
 #include "Vec4.h"
+#include "Matrix4.h"
 #include "Ray.h"
 #include "Material.h"
+
+#ifdef __CUDACC__
+#define CUDA_CALLABLE_MEMBER __host__ __device__
+#else
+#define CUDA_CALLABLE_MEMBER
+#endif
+
 
 struct Sphere
 {
@@ -15,7 +23,7 @@ struct Sphere
 
 
 	// Functions
-	Sphere(int in_id)
+	CUDA_CALLABLE_MEMBER Sphere(int in_id)
 	{
 		origin = Vec4::Point(0.0f, 0.0f, 0.0f);
 		radius = 1.0f;
@@ -23,7 +31,7 @@ struct Sphere
 		tranformationToWorldSpace = Matrix4::Identity();
 	}
 
-	Sphere(Vec4 in_origin, float in_radius, int in_id)
+	CUDA_CALLABLE_MEMBER Sphere(Vec4 in_origin, float in_radius, int in_id)
 	{
 		origin = in_origin;
 		radius = in_radius;
@@ -31,7 +39,7 @@ struct Sphere
 		tranformationToWorldSpace = Matrix4::Identity();
 	}
 
-	void Intersect(Ray &ray)
+	CUDA_CALLABLE_MEMBER void Intersect(Ray &ray)
 	{
 		if (tranformationToWorldSpace.IsInvertible())
 		{
@@ -59,12 +67,12 @@ struct Sphere
 		}
 	}
 
-	void AddTranformation(Matrix4 &rhs)
+	CUDA_CALLABLE_MEMBER void AddTranformation(Matrix4 &rhs)
 	{
 		tranformationToWorldSpace = rhs.MMult(tranformationToWorldSpace);
 	}
 
-	Vec4 GetNormal(Vec4 p)
+	CUDA_CALLABLE_MEMBER Vec4 GetNormal(Vec4 p)
 	{
 		Matrix4 inverseTransformToWS = tranformationToWorldSpace.Inverse();
 		Vec4 objectSpacePoint = inverseTransformToWS.MMult(p);

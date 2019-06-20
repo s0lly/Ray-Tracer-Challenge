@@ -3,6 +3,12 @@
 #include "PointLight.h"
 #include "Vec4.h"
 
+#ifdef __CUDACC__
+#define CUDA_CALLABLE_MEMBER __host__ __device__
+#else
+#define CUDA_CALLABLE_MEMBER
+#endif
+
 struct Material
 {
 	// Data
@@ -15,7 +21,7 @@ struct Material
 
 	// Functions
 
-	Material()
+	CUDA_CALLABLE_MEMBER Material()
 	{
 		ambient = 0.1f;
 		diffuse = 0.9f;
@@ -24,7 +30,7 @@ struct Material
 	}
 
 
-	Colorf Lighting(PointLight &p, Vec4 &pos, Vec4 &eyeVec, Vec4 &normalVec)
+	CUDA_CALLABLE_MEMBER Colorf Lighting(PointLight &p, Vec4 &pos, Vec4 &eyeVec, Vec4 &normalVec)
 	{
 		Colorf effectiveColor = color * p.color;
 		effectiveColor.r *= (pos.Normalize().x + 1.0f) / 2.0f;

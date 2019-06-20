@@ -7,6 +7,7 @@
 #include <string>
 
 
+
 struct Canvas
 {
 	// Data

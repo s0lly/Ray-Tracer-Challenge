@@ -2,6 +2,11 @@
 
 #include "Vec4.h"
 
+#ifdef __CUDACC__
+#define CUDA_CALLABLE_MEMBER __host__ __device__
+#else
+#define CUDA_CALLABLE_MEMBER
+#endif
 
 
 
@@ -13,13 +18,13 @@ struct Intersection
 
 
 	// Functions
-	Intersection()
+	CUDA_CALLABLE_MEMBER Intersection()
 	{
 		t = 0.0f;
 		objID = -1.0f;
 	}
 
-	Intersection(float in_t, int in_objID)
+	CUDA_CALLABLE_MEMBER Intersection(float in_t, int in_objID)
 	{
 		t = in_t;
 		objID = in_objID;
@@ -30,31 +35,31 @@ struct Intersection
 struct IntersectionList
 {
 	// Data
-	Intersection *list;
+	Intersection list[100];
 	int currentNum;
 
 
 	// Functions
-	IntersectionList()
+	CUDA_CALLABLE_MEMBER IntersectionList()
 	{
 		// TODO: make list size modifiable?
-		list = new Intersection[100];
+		//list = new Intersection[100];
 		currentNum = 0;
 	}
 
-	~IntersectionList()
-	{
-		delete[] list;
-	}
+	//~IntersectionList()
+	//{
+	//	delete[] list;
+	//}
 
 
-	void AddIntersection(float in_t, int in_objID)
+	CUDA_CALLABLE_MEMBER void AddIntersection(float in_t, int in_objID)
 	{
 		list[currentNum] = Intersection(in_t, in_objID);
 		currentNum++;
 	}
 
-	bool FindAndGetHit(Intersection &intersection)
+	CUDA_CALLABLE_MEMBER bool FindAndGetHit(Intersection &intersection)
 	{
 		bool foundHit = false;
 		float smallestPosT = 999999999999999.0f;
@@ -90,20 +95,20 @@ struct Ray
 
 	// Functions
 
-	Ray() {}
+	CUDA_CALLABLE_MEMBER Ray() {}
 
-	Ray(Vec4 orig, Vec4 dir)
+	CUDA_CALLABLE_MEMBER Ray(Vec4 orig, Vec4 dir)
 	{
 		origin = orig;
 		direction = dir;
 	}
 
-	Vec4 Position(float t)
+	CUDA_CALLABLE_MEMBER Vec4 Position(float t)
 	{
 		return origin + direction * t;
 	}
 
-	void Transform(Matrix4 transformationMat)
+	CUDA_CALLABLE_MEMBER void Transform(Matrix4 transformationMat)
 	{
 		origin = transformationMat.MMult(origin);
 		direction = transformationMat.MMult(direction);
