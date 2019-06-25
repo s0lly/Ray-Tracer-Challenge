@@ -11,6 +11,8 @@
 #include "Ray.h"
 #include "Matrix4.h"
 #include "Vec4.h"
+#include "Camera.h"
+#include "World.h"
 
 
 #define THREADS_PER_BLOCK 256
@@ -30,45 +32,52 @@ __global__ void addVec4Kernel(Vec4 *c4, Vec4 *a4, Vec4 *b4)
 	Equiv(c4[i].x, b4[i].y);
 }
 
-__global__ void DrawScene(int *checkerCuda, Colorf *colorsCuda, Sphere *s, PointLight *light, int width, int height)
+__global__ void DrawScene(int *checkerCuda, Colorf *colorsCuda, World *world, Camera *camera, int width, int height)
 {
 	int val = threadIdx.x + blockIdx.x * blockDim.x;
 	int i = val % width;
-	int j = val / width;
+	int j = height - 1 - val / width;
 
 	checkerCuda[val] = val;
 
 
 
-	float viewBoardHalfWidth = 5.0f * (float)width / (float)height;
-	float viewBoardHalfHeight = 5.0f;
-	Vec4 viewBoardOrigin = Vec4::Point(0.0f, 0.0f, 10.0f);
+	//float viewBoardHalfWidth = 5.0f * (float)width / (float)height;
+	//float viewBoardHalfHeight = 5.0f;
+	//Vec4 viewBoardOrigin = Vec4::Point(0.0f, 0.0f, 10.0f);
+	//
+	//Vec4 rayOrigin = Vec4::Point(0.0f, 0.0f, -5.0f);
+	//
+	//
+	//Vec4 viewBoardLoc = viewBoardOrigin + Vec4::Point((float)(((float)i - (float)(width / 2)) / (float)(width / 2)) * viewBoardHalfWidth, -(float)(((float)j - (float)(height / 2)) / (float)(height / 2)) * viewBoardHalfHeight, 0.0f);
+	//
+	//Vec4 directionFromRayToViewBoard = viewBoardLoc - rayOrigin;
+	//
+	//Ray ray(rayOrigin, directionFromRayToViewBoard.Normalize());
+	//
+	//s->Intersect(ray);
+	//
+	//Intersection hit;
+	//
+	//if (ray.intersections.FindAndGetHit(hit))
+	//{
+	//	Vec4 positionOnSphere = ray.Position(hit.t);
+	//	Colorf color = s->material.Lighting(*light, ray.Position(hit.t), ray.origin - positionOnSphere, s->GetNormal(positionOnSphere), false);
+	//	//c->SetPixel(i, j, color);
+	//	colorsCuda[val] = color;
+	//}
+	//else
+	//{
+	//	//c->SetPixel(i, j, Colorf{ 0.0f, 0.0f, 0.0f });
+	//	colorsCuda[val] = Colorf{ 0.0f, 0.0f, 0.0f };
+	//}
 
-	Vec4 rayOrigin = Vec4::Point(0.0f, 0.0f, -5.0f);
 
-
-	Vec4 viewBoardLoc = viewBoardOrigin + Vec4::Point((float)(((float)i - (float)(width / 2)) / (float)(width / 2)) * viewBoardHalfWidth, -(float)(((float)j - (float)(height / 2)) / (float)(height / 2)) * viewBoardHalfHeight, 0.0f);
-
-	Vec4 directionFromRayToViewBoard = viewBoardLoc - rayOrigin;
-
-	Ray ray(rayOrigin, directionFromRayToViewBoard.Normalize());
-
-	s->Intersect(ray);
-
-	Intersection hit;
-
-	if (ray.intersections.FindAndGetHit(hit))
-	{
-		Vec4 positionOnSphere = ray.Position(hit.t);
-		Colorf color = s->material.Lighting(*light, ray.Position(hit.t), ray.origin - positionOnSphere, s->GetNormal(positionOnSphere), false);
-		//c->SetPixel(i, j, color);
-		colorsCuda[val] = color;
-	}
-	else
-	{
-		//c->SetPixel(i, j, Colorf{ 0.0f, 0.0f, 0.0f });
-		colorsCuda[val] = Colorf{ 0.0f, 0.0f, 0.0f };
-	}
+	Ray ray = camera->RayAtPixel(i, j);
+	
+	Colorf color = world->ColorAt(ray);
+	
+	colorsCuda[val] = color;
 }
 
 int mainCUDA()
@@ -118,16 +127,26 @@ int mainCUDA()
 
 	cudaSetDevice(0);
 
+	Canvas c(1800, 900);
+
+	Camera camera(1800, 900, PI / 3.0f);
+	camera.SetViewTransform(Vec4::Point(0.0f, 1.5f, -5.0f), Vec4::Point(0.0f, 1.0f, 0.0f), Vec4::Vec(0.0f, 1.0f, 0.0f));
+
+	World world;
+
 
 	
-	Canvas c(1600, 900);
 
-	Sphere s(0);
-	s.material.color = Colorf{ 1.0f, 0.2f, 1.0f };
-	s.AddTranformation(Matrix4::Scale(1.0f, 1.0f, 1.0f));
-	s.AddTranformation(Matrix4::RotationY(PI / 2.0f));
 
-	PointLight light(Vec4::Point(-10.0f, 10.0f, -10.0), Colorf{ 1.0f, 1.0f, 1.0f });
+	
+	//Canvas c(1600, 900);
+	//
+	//Sphere s(0);
+	//s.material.color = Colorf{ 1.0f, 0.2f, 1.0f };
+	//s.AddTranformation(Matrix4::Scale(1.0f, 1.0f, 1.0f));
+	//s.AddTranformation(Matrix4::RotationY(PI / 2.0f));
+	//
+	//PointLight light(Vec4::Point(-10.0f, 10.0f, -10.0), Colorf{ 1.0f, 1.0f, 1.0f });
 
 
 	int *checker = new int[c.width * c.height];
@@ -145,24 +164,24 @@ int mainCUDA()
 
 	int *checkerCuda;
 	Colorf *colorsCuda;
-	Sphere *sCuda;
-	PointLight *lightCuda;
+	World *worldCuda;
+	Camera *cameraCuda;
 
 	cudaMalloc((void**)&checkerCuda, c.width * c.height * sizeof(int));
 	cudaMalloc((void**)&colorsCuda, c.width * c.height * sizeof(Colorf));
-	cudaMalloc((void**)&sCuda, sizeof(Sphere));
-	cudaMalloc((void**)&lightCuda, sizeof(PointLight));
+	cudaMalloc((void**)&worldCuda, sizeof(World));
+	cudaMalloc((void**)&cameraCuda, sizeof(Camera));
 
 	cudaMemcpy(checkerCuda, checker, c.width * c.height * sizeof(int), cudaMemcpyHostToDevice);
 	cudaMemcpy(colorsCuda, colors, c.width * c.height * sizeof(Colorf), cudaMemcpyHostToDevice);
-	cudaMemcpy(sCuda, &s, sizeof(Sphere), cudaMemcpyHostToDevice);
-	cudaMemcpy(lightCuda, &light, sizeof(PointLight), cudaMemcpyHostToDevice);
+	cudaMemcpy(worldCuda, &world, sizeof(World), cudaMemcpyHostToDevice);
+	cudaMemcpy(cameraCuda, &camera, sizeof(Camera), cudaMemcpyHostToDevice);
 
 
 	int blockSize = THREADS_PER_BLOCK;
 	int numBlocks = (c.width * c.height + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK;
 
-	DrawScene <<< numBlocks, blockSize >>> (checkerCuda, colorsCuda, sCuda, lightCuda, c.width, c.height);
+	DrawScene <<< numBlocks, blockSize >>> (checkerCuda, colorsCuda, worldCuda, cameraCuda, c.width, c.height);
 	cudaDeviceSynchronize();
 
 	cudaMemcpy(checker, checkerCuda, c.width * c.height * sizeof(int), cudaMemcpyDeviceToHost);
@@ -184,7 +203,7 @@ int mainCUDA()
 
 
 
-	c.CreatePPM("chapter6.ppm");
+	c.CreatePPM("chapter8cuda.ppm");
 
 
 

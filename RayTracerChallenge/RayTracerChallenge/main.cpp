@@ -213,37 +213,34 @@ int main()
 
 	//Ray r = c.RayAtPixel(0, 0);
 
-	Canvas c(1800, 900);
-
-	Camera camera(1800, 900, PI / 3.0f);
-	camera.SetViewTransform(Vec4::Point(0.0f, 1.5f, -5.0f), Vec4::Point(0.0f, 1.0f, 0.0f), Vec4::Vec(0.0f, 1.0f, 0.0f));
-	
-	World world;
-	
-	//world.spheres[1].AddTranformation(Matrix4::Translation(-0.5f, 0.0f, -0.5f));
-	//world.spheres[1].material.color.g = 0.2f;
-	
-	
-	for (int i = 0; i < c.width; i++)
-	{
-		for (int j = 0; j < c.height; j++)
-		{
-			Ray ray = camera.RayAtPixel(i, j);
-	
-			Colorf color = world.ColorAt(ray);
-	
-			c.SetPixel(i, c.height - 1 - j , color);
-		}
-	}
-	
-	
-	c.CreatePPM("chapter8.ppm");
+	//Canvas c(1800, 900);
+	//
+	//Camera camera(1800, 900, PI / 3.0f);
+	//camera.SetViewTransform(Vec4::Point(0.0f, 1.5f, -5.0f), Vec4::Point(0.0f, 1.0f, 0.0f), Vec4::Vec(0.0f, 1.0f, 0.0f));
+	//
+	//World world;
+	//
+	//
+	//for (int i = 0; i < c.width; i++)
+	//{
+	//	for (int j = 0; j < c.height; j++)
+	//	{
+	//		Ray ray = camera.RayAtPixel(i, j);
+	//
+	//		Colorf color = world.ColorAt(ray);
+	//
+	//		c.SetPixel(i, c.height - 1 - j , color);
+	//	}
+	//}
+	//
+	//
+	//c.CreatePPM("chapter8.ppm");
 
 
 	int testcheck = 0;
 
 	
-	//mainCUDA();
+	mainCUDA();
 
 	
 }

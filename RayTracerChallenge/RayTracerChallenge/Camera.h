@@ -10,7 +10,7 @@ struct Camera
 	float fovAdjustment;
 	Matrix4 viewTransform;
 
-	Camera(int w, int h, float in_fov)
+	CUDA_CALLABLE_MEMBER Camera(int w, int h, float in_fov)
 	{
 		width = w;
 		height = h;
@@ -18,7 +18,7 @@ struct Camera
 		viewTransform = Matrix4::Identity();
 	}
 
-	void SetViewTransform(Vec4 &from, Vec4 &to, Vec4 &up)
+	CUDA_CALLABLE_MEMBER void SetViewTransform(Vec4 &from, Vec4 &to, Vec4 &up)
 	{
 		Vec4 forwardVec = (to - from).Normalize();
 		Vec4 leftVec = forwardVec.Cross(up.Normalize());
@@ -32,7 +32,7 @@ struct Camera
 		viewTransform = Matrix4::Translation(from.x, from.y, from.z).MMult(viewTransform);
 	}
 
-	Ray RayAtPixel(int i, int j)
+	CUDA_CALLABLE_MEMBER Ray RayAtPixel(int i, int j)
 	{
 		float worldX = (((float)i + 0.5f) - (float)width / 2.0f) * fovAdjustment;
 		float worldY = (((float)j + 0.5f) - (float)height / 2.0f) * fovAdjustment;

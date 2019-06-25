@@ -20,7 +20,7 @@ struct ComputeInfo
 
 	// Functions
 
-	void Prepare(Intersection &i, Ray &r)
+	CUDA_CALLABLE_MEMBER void Prepare(Intersection &i, Ray &r)
 	{
 		t = i.t;
 		obj = i.obj;

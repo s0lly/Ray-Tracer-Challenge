@@ -7,16 +7,16 @@
 
 struct World
 {
-	Sphere *spheres;
+	Sphere spheres[6];
 	int numSpheres;
-	PointLight *pointLights;
+	PointLight pointLights[1];
 	int numLights;
 
 	CUDA_CALLABLE_MEMBER World()
 	{
 		numSpheres = 6;
 
-		spheres = new Sphere[numSpheres];
+		//spheres = Sphere[numSpheres];
 
 		spheres[0].AddTranformation(Matrix4::Scale(10.0f, 0.01f, 10.0f));
 		spheres[0].material.color = Colorf{ 1.0f, 0.9f, 0.9f };
@@ -53,7 +53,7 @@ struct World
 
 		numLights = 1;
 
-		pointLights = new PointLight[numLights];
+		//pointLights = new PointLight[numLights];
 
 		pointLights[0] = PointLight(Vec4::Point(-10.0f, 10.0f, -10.0f), Colorf{ 1.0f, 1.0f, 1.0f });
 	}
