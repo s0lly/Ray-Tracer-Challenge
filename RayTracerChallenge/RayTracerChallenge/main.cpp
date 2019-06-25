@@ -237,7 +237,7 @@ int main()
 	}
 	
 	
-	c.CreatePPM("chapter7.ppm");
+	c.CreatePPM("chapter8.ppm");
 
 
 	int testcheck = 0;

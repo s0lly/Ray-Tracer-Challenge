@@ -55,7 +55,7 @@ struct World
 
 		pointLights = new PointLight[numLights];
 
-		pointLights[0] = PointLight(Vec4::Point(0.0f, 10.0f, -10.0f), Colorf{ 1.0f, 1.0f, 1.0f });
+		pointLights[0] = PointLight(Vec4::Point(-10.0f, 10.0f, -10.0f), Colorf{ 1.0f, 1.0f, 1.0f });
 	}
 
 	CUDA_CALLABLE_MEMBER void Intersect(Ray &ray)
@@ -73,9 +73,29 @@ struct World
 		Colorf color;
 		for (int i = 0; i < numLights; i++)
 		{
-			color = color + compInfo.obj->material.Lighting(pointLights[i], compInfo.point, compInfo.eyeVec, compInfo.normalVec);
+			bool isInShadow = IsInShadow(compInfo, pointLights[i]);
+			color = color + compInfo.obj->material.Lighting(pointLights[i], compInfo.point, compInfo.eyeVec, compInfo.normalVec, isInShadow);
 		}
 		return color;
+	}
+
+	CUDA_CALLABLE_MEMBER bool IsInShadow(ComputeInfo &compInfo, PointLight &light)
+	{
+		bool isInShadow = false;
+
+		Vec4 adjustedPoint = compInfo.point + compInfo.normalVec * FLOAT_EPSILON * 10.0f;
+		Vec4 pointToLight = light.position - adjustedPoint;
+		float distance = pointToLight.Magnitude();
+		Vec4 direction = pointToLight.Normalize();
+
+		Ray ray(adjustedPoint, direction);
+		Intersect(ray);
+		Intersection hit;
+		if (ray.intersections.FindAndGetHit(hit) && hit.t < distance)
+		{
+			isInShadow = true;
+		}
+		return isInShadow;
 	}
 
 	CUDA_CALLABLE_MEMBER Colorf ColorAt(Ray &ray)

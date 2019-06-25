@@ -60,7 +60,7 @@ __global__ void DrawScene(int *checkerCuda, Colorf *colorsCuda, Sphere *s, Point
 	if (ray.intersections.FindAndGetHit(hit))
 	{
 		Vec4 positionOnSphere = ray.Position(hit.t);
-		Colorf color = s->material.Lighting(*light, ray.Position(hit.t), ray.origin - positionOnSphere, s->GetNormal(positionOnSphere));
+		Colorf color = s->material.Lighting(*light, ray.Position(hit.t), ray.origin - positionOnSphere, s->GetNormal(positionOnSphere), false);
 		//c->SetPixel(i, j, color);
 		colorsCuda[val] = color;
 	}

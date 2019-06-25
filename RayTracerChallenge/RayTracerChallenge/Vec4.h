@@ -8,7 +8,7 @@
 #define CUDA_CALLABLE_MEMBER
 #endif
 
-#define FLOAT_EPSILON 0.00001f
+#define FLOAT_EPSILON 0.0001f
 #define PI 3.1415926f
 
 CUDA_CALLABLE_MEMBER static bool Equiv(float a, float b)
