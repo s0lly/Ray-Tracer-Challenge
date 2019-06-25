@@ -14,25 +14,48 @@ struct World
 
 	CUDA_CALLABLE_MEMBER World()
 	{
-		numSpheres = 2;
+		numSpheres = 6;
 
 		spheres = new Sphere[numSpheres];
 
-		spheres[0].id = 0;
-		spheres[0].material.color = Colorf{ 0.8f, 1.0f, 0.6f };
-		spheres[0].material.diffuse = 0.7f;
-		spheres[0].material.specular = 0.2f;
+		spheres[0].AddTranformation(Matrix4::Scale(10.0f, 0.01f, 10.0f));
+		spheres[0].material.color = Colorf{ 1.0f, 0.9f, 0.9f };
+		spheres[0].material.specular = 0.0f;
 
-		spheres[1].id = 1;
-		spheres[1].AddTranformation(Matrix4::Scale(0.5f, 0.5f, 0.5f));
+		spheres[1].AddTranformation(Matrix4::Scale(10.0f, 0.01f, 10.0f));
+		spheres[1].AddTranformation(Matrix4::RotationX(PI / 2.0f));
+		spheres[1].AddTranformation(Matrix4::RotationY(-PI / 4.0f));
+		spheres[1].AddTranformation(Matrix4::Translation(0.0f, 0.0f, 5.0f));
+		spheres[1].material = spheres[0].material;
 
+		spheres[2].AddTranformation(Matrix4::Scale(10.0f, 0.01f, 10.0f));
+		spheres[2].AddTranformation(Matrix4::RotationX(PI / 2.0f));
+		spheres[2].AddTranformation(Matrix4::RotationY(PI / 4.0f));
+		spheres[2].AddTranformation(Matrix4::Translation(0.0f, 0.0f, 5.0f));
+		spheres[2].material = spheres[0].material;
 
+		spheres[3].AddTranformation(Matrix4::Translation(-0.5f, 1.0f, 0.5f));
+		spheres[3].material.color = Colorf{ 0.1f, 1.0f, 0.5f };
+		spheres[3].material.diffuse = 0.7f;
+		spheres[3].material.specular = 0.3f;
+
+		spheres[4].AddTranformation(Matrix4::Scale(0.5f, 0.5f, 0.5f));
+		spheres[4].AddTranformation(Matrix4::Translation(1.5f, 0.5f, -0.5f));
+		spheres[4].material.color = Colorf{ 0.5f, 1.0f, 0.1f };
+		spheres[4].material.diffuse = 0.7f;
+		spheres[4].material.specular = 0.3f;
+
+		spheres[5].AddTranformation(Matrix4::Scale(0.33f, 0.33f, 0.33f));
+		spheres[5].AddTranformation(Matrix4::Translation(-1.5f, 0.33f, -0.75f));
+		spheres[5].material.color = Colorf{ 1.0f, 0.8f, 0.1f };
+		spheres[5].material.diffuse = 0.7f;
+		spheres[5].material.specular = 0.3f;
 
 		numLights = 1;
 
 		pointLights = new PointLight[numLights];
 
-		pointLights[0] = PointLight(Vec4::Point(-10.0f, 10.0f, -10.0f), Colorf{ 1.0f, 1.0f, 1.0f });
+		pointLights[0] = PointLight(Vec4::Point(0.0f, 10.0f, -10.0f), Colorf{ 1.0f, 1.0f, 1.0f });
 	}
 
 	CUDA_CALLABLE_MEMBER void Intersect(Ray &ray)
