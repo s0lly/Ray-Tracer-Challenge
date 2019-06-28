@@ -21,6 +21,7 @@
 #include "MainWindow.h"
 #include "Game.h"
 #include "ChiliException.h"
+#include "cuda_runtime.h"
 
 
 int WINAPI main( HINSTANCE hInst,HINSTANCE,LPWSTR pArgs,INT )
@@ -30,11 +31,13 @@ int WINAPI main( HINSTANCE hInst,HINSTANCE,LPWSTR pArgs,INT )
 		MainWindow wnd( hInst,pArgs );		
 		try
 		{
+			cudaSetDevice(0);
 			Game theGame( wnd );
 			while( wnd.ProcessMessage() )
 			{
 				theGame.Go();
 			}
+			cudaDeviceReset();
 		}
 		catch( const ChiliException& e )
 		{
