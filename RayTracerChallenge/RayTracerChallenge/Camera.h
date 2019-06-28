@@ -10,6 +10,8 @@ struct Camera
 	float fovAdjustment;
 	Matrix4 viewTransform;
 
+	CUDA_CALLABLE_MEMBER Camera() {}
+
 	CUDA_CALLABLE_MEMBER Camera(int w, int h, float in_fov)
 	{
 		width = w;

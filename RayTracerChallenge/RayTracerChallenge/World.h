@@ -83,7 +83,7 @@ struct World
 	{
 		bool isInShadow = false;
 
-		Vec4 adjustedPoint = compInfo.point + compInfo.normalVec * FLOAT_EPSILON * 10.0f;
+		Vec4 adjustedPoint = compInfo.point + compInfo.normalVec * FLOAT_EPSILON * 100.0f;
 		Vec4 pointToLight = light.position - adjustedPoint;
 		float distance = pointToLight.Magnitude();
 		Vec4 direction = pointToLight.Normalize();

@@ -13,6 +13,7 @@
 #include "Vec4.h"
 #include "Camera.h"
 #include "World.h"
+#include "Colors.h"
 
 
 #define THREADS_PER_BLOCK 256
@@ -32,7 +33,7 @@ __global__ void addVec4Kernel(Vec4 *c4, Vec4 *a4, Vec4 *b4)
 	Equiv(c4[i].x, b4[i].y);
 }
 
-__global__ void DrawScene(int *checkerCuda, Colorf *colorsCuda, World *world, Camera *camera, int width, int height)
+__global__ void DrawScene(int *checkerCuda, unsigned int *colorsCuda, World *world, Camera *camera, int width, int height)
 {
 	int val = threadIdx.x + blockIdx.x * blockDim.x;
 	int i = val % width;
@@ -77,10 +78,24 @@ __global__ void DrawScene(int *checkerCuda, Colorf *colorsCuda, World *world, Ca
 	
 	Colorf color = world->ColorAt(ray);
 	
-	colorsCuda[val] = color;
+	//colorsCuda[val] = color;
+
+	int r = (int)(color.r * 255.999f);
+	int g = (int)(color.g * 255.999f);
+	int b = (int)(color.b * 255.999f);
+
+	r = r > 255 ? 255 : r;
+	g = g > 255 ? 255 : g;
+	b = b > 255 ? 255 : b;
+
+	unsigned int dword;
+
+	dword = (((unsigned char)r << 16u) | ((unsigned char)g << 8u) | (unsigned char)b);
+
+	colorsCuda[val] = dword;
 }
 
-int mainCUDA()
+int mainCUDA(unsigned int *colors, Camera &camera)
 {
 
 
@@ -127,10 +142,10 @@ int mainCUDA()
 
 	cudaSetDevice(0);
 
-	Canvas c(1800, 900);
+	//Canvas c(1280, 720);
 
-	Camera camera(1800, 900, PI / 3.0f);
-	camera.SetViewTransform(Vec4::Point(0.0f, 1.5f, -5.0f), Vec4::Point(0.0f, 1.0f, 0.0f), Vec4::Vec(0.0f, 1.0f, 0.0f));
+	
+	
 
 	World world;
 
@@ -149,46 +164,45 @@ int mainCUDA()
 	//PointLight light(Vec4::Point(-10.0f, 10.0f, -10.0), Colorf{ 1.0f, 1.0f, 1.0f });
 
 
-	int *checker = new int[c.width * c.height];
-	for (int i = 0; i < c.width * c.height; i++)
+	int *checker = new int[camera.width * camera.height];
+	for (int i = 0; i < camera.width * camera.height; i++)
 	{
 		checker[i] = 0;
 	}
 
-	Colorf *colors = new Colorf[c.width * c.height];
-	for (int i = 0; i < c.width * c.height; i++)
-	{
-		colors[i] = Colorf{ 0.0f, 0.0f, 0.0f };
-	}
+	
 
 
 	int *checkerCuda;
-	Colorf *colorsCuda;
+	unsigned int *colorsCuda;
 	World *worldCuda;
 	Camera *cameraCuda;
 
-	cudaMalloc((void**)&checkerCuda, c.width * c.height * sizeof(int));
-	cudaMalloc((void**)&colorsCuda, c.width * c.height * sizeof(Colorf));
+	cudaMalloc((void**)&checkerCuda, camera.width * camera.height * sizeof(int));
+	cudaMalloc((void**)&colorsCuda, camera.width * camera.height * sizeof(unsigned int));
 	cudaMalloc((void**)&worldCuda, sizeof(World));
 	cudaMalloc((void**)&cameraCuda, sizeof(Camera));
 
-	cudaMemcpy(checkerCuda, checker, c.width * c.height * sizeof(int), cudaMemcpyHostToDevice);
-	cudaMemcpy(colorsCuda, colors, c.width * c.height * sizeof(Colorf), cudaMemcpyHostToDevice);
+	cudaMemcpy(checkerCuda, checker, camera.width * camera.height * sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(colorsCuda, colors, camera.width * camera.height * sizeof(unsigned int), cudaMemcpyHostToDevice);
 	cudaMemcpy(worldCuda, &world, sizeof(World), cudaMemcpyHostToDevice);
 	cudaMemcpy(cameraCuda, &camera, sizeof(Camera), cudaMemcpyHostToDevice);
 
 
 	int blockSize = THREADS_PER_BLOCK;
-	int numBlocks = (c.width * c.height + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK;
+	int numBlocks = (camera.width * camera.height + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK;
 
-	DrawScene <<< numBlocks, blockSize >>> (checkerCuda, colorsCuda, worldCuda, cameraCuda, c.width, c.height);
+	DrawScene <<< numBlocks, blockSize >>> (checkerCuda, colorsCuda, worldCuda, cameraCuda, camera.width, camera.height);
 	cudaDeviceSynchronize();
 
-	cudaMemcpy(checker, checkerCuda, c.width * c.height * sizeof(int), cudaMemcpyDeviceToHost);
-	cudaMemcpy(colors, colorsCuda, c.width * c.height * sizeof(Colorf), cudaMemcpyDeviceToHost);
+	cudaMemcpy(checker, checkerCuda, camera.width * camera.height * sizeof(int), cudaMemcpyDeviceToHost);
+	cudaMemcpy(colors, colorsCuda, camera.width * camera.height * sizeof(unsigned int), cudaMemcpyDeviceToHost);
 
 
 	cudaFree(checkerCuda);
+	cudaFree(colorsCuda);
+	cudaFree(worldCuda);
+	cudaFree(cameraCuda);
 
 	cudaDeviceReset();
 
@@ -199,11 +213,11 @@ int mainCUDA()
 		return 1;
 	}
 
-	memcpy(c.pixels, colors, c.width * c.height * sizeof(Colorf));
+	//memcpy(c.pixels, colors, c.width * c.height * sizeof(Colorf));
 
 
 
-	c.CreatePPM("chapter8cuda.ppm");
+	//c.CreatePPM("chapter8cudachili.ppm");
 
 
 
@@ -359,7 +373,7 @@ cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size)
     }
 
     // Launch a kernel on the GPU with one thread for each element.
-    addKernel<<<1, size>>>(dev_c, dev_a, dev_b);
+    //addKernel<<<1, size>>>(dev_c, dev_a, dev_b);
 
     // Check for any errors launching the kernel
     cudaStatus = cudaGetLastError();

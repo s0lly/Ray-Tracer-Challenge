@@ -1,246 +1,80 @@
-#include "Canvas.h"
-#include "Matrix4.h"
-#include "Vec4.h"
-#include "Ray.h"
-#include "Sphere.h"
-#include "World.h"
-#include "ComputeInfo.h""
-#include "Camera.h"
+/******************************************************************************************
+*	Chili DirectX Framework Version 16.07.20											  *
+*	Main.cpp																			  *
+*	Copyright 2016 PlanetChili.net <http://www.planetchili.net>							  *
+*																						  *
+*	This file is part of The Chili DirectX Framework.									  *
+*																						  *
+*	The Chili DirectX Framework is free software: you can redistribute it and/or modify	  *
+*	it under the terms of the GNU General Public License as published by				  *
+*	the Free Software Foundation, either version 3 of the License, or					  *
+*	(at your option) any later version.													  *
+*																						  *
+*	The Chili DirectX Framework is distributed in the hope that it will be useful,		  *
+*	but WITHOUT ANY WARRANTY; without even the implied warranty of						  *
+*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the						  *
+*	GNU General Public License for more details.										  *
+*																						  *
+*	You should have received a copy of the GNU General Public License					  *
+*	along with The Chili DirectX Framework.  If not, see <http://www.gnu.org/licenses/>.  *
+******************************************************************************************/
+#include "MainWindow.h"
+#include "Game.h"
+#include "ChiliException.h"
 
-#include <cuda_runtime.h>
 
-int mainCUDA();
-
-
-struct Projectile
+int WINAPI main( HINSTANCE hInst,HINSTANCE,LPWSTR pArgs,INT )
 {
-	Vec4 pos;
-	Vec4 vel;
-};
+	try
+	{
+		MainWindow wnd( hInst,pArgs );		
+		try
+		{
+			Game theGame( wnd );
+			while( wnd.ProcessMessage() )
+			{
+				theGame.Go();
+			}
+		}
+		catch( const ChiliException& e )
+		{
+			const std::wstring eMsg = e.GetFullMessage() + 
+				L"\n\nException caught at Windows message loop.";
+			wnd.ShowMessageBox( e.GetExceptionType(),eMsg,MB_ICONERROR );
+		}
+		catch( const std::exception& e )
+		{
+			// need to convert std::exception what() string from narrow to wide string
+			const std::string whatStr( e.what() );
+			const std::wstring eMsg = std::wstring( whatStr.begin(),whatStr.end() ) + 
+				L"\n\nException caught at Windows message loop.";
+			wnd.ShowMessageBox( L"Unhandled STL Exception",eMsg,MB_ICONERROR );
+		}
+		catch( ... )
+		{
+			wnd.ShowMessageBox( L"Unhandled Non-STL Exception",
+				L"\n\nException caught at Windows message loop.",MB_ICONERROR );
+		}
+	}
+	catch( const ChiliException& e )
+	{
+		const std::wstring eMsg = e.GetFullMessage() +
+			L"\n\nException caught at main window creation.";
+		MessageBox( nullptr,eMsg.c_str(),e.GetExceptionType().c_str(),MB_ICONERROR );
+	}
+	catch( const std::exception& e )
+	{
+		// need to convert std::exception what() string from narrow to wide string
+		const std::string whatStr( e.what() );
+		const std::wstring eMsg = std::wstring( whatStr.begin(),whatStr.end() ) +
+			L"\n\nException caught at main window creation.";
+		MessageBox( nullptr,eMsg.c_str(),L"Unhandled STL Exception",MB_ICONERROR );
+	}
+	catch( ... )
+	{
+		MessageBox( nullptr,L"\n\nException caught at main window creation.",
+			L"Unhandled Non-STL Exception",MB_ICONERROR );
+	}
 
-struct Environment
-{
-	Vec4 gravity;
-	Vec4 wind;
-};
-
-
-static Projectile Tick(Environment &env, Projectile &proj)
-{
-	Vec4 pos = proj.pos + proj.vel;
-	Vec4 vel = proj.vel + env.gravity + env.wind;
-	return Projectile{ pos, vel };
-}
-
-
-int main()
-{
-	//float *test;
-	//cudaMallocManaged(&test, 100 * sizeof(float));
-
-
-
-	
-	//Matrix4 mat = {3.0f, -9.0f, 7.0f, 3.0f, 3.0f, -8.0f, 2.0f, -9.0f, -4.0f, 4.0f, 4.0f, 1.0f, -6.0f, 5.0f, -1.0f, 1.0f };
-	//Matrix4 mat2 = { 8.0f, 2.0f, 2.0f, 2.0f, 3.0f, -1.0f, 7.0f, 0.0f, 7.0f, 0.0f, 5.0f, 4.0f, 6.0f, -2.0f, 0.0f, 5.0f };
-	//Matrix4 mat3 = Matrix4::Scale(2.0f, 3.0f, 4.0f);
-	//float det = mat.Determinant();
-	//mat3.e[2][2] = 5.0f;
-
-	//Vec4 point = Vec4::Point(1.0f, 0.0f, 1.0f);
-	//Matrix4 transforms[3];
-	//transforms[0] = Matrix4::RotationX(PI / 2.0f);
-	//transforms[1] = Matrix4::Scale(5.0f, 5.0f, 5.0f);
-	//transforms[2] = Matrix4::Translation(10.0f, 5.0f, 7.0f);
-	//Matrix4 transformer = Matrix4::Transformer(transforms, 3);
-	//
-	//Vec4 matCheck = transformer.MMult(point);
-
-	
-	//Projectile p = Projectile{ Vec4::Point(0.0f, 1.0f, 0.0f), Vec4::Vec(1.0f, 1.5f, 0.0f).Normalize() * 10.0f };
-	//Environment e = Environment{ Vec4::Vec(0.0f, -0.1f, 0.0f), Vec4::Vec(-0.01f, 0.0f, 0.0f) };
-	//
-	
-	//
-	//int tickNum = 0;
-	//
-	//while(p.pos.y > 0)
-	//{
-	//	p = Tick(e, p);
-	//
-	//	if (p.pos.x >= 0 && p.pos.x < c.width &&
-	//		p.pos.y >= 0 && p.pos.y < c.height)
-	//	{
-	//		c.SetPixel((int)p.pos.x, (int)((float)c.height - p.pos.y), Colorf{ 1.0f, 0.0f, 0.0f });
-	//	}
-	//	
-	//	tickNum++;
-	//}
-
-
-	
-
-	//for (int i = 0; i < 12; i++)
-	//{
-	//	Vec4 point = Vec4::Point(0.0f, 200.0f, 0.0f);
-	//	point = Matrix4::RotationZ(i * 2.0f * PI / 12.0f).MMult(point);
-	//	point = Matrix4::Translation((float)c.width / 2.0f, (float)c.height / 2.0f, 0.0f).MMult(point);
-	//	c.SetPixel((int)point.x, (int)((float)c.height - point.y), Colorf{ 1.0f, 0.0f, 0.0f });
-	//}
-	//
-	//
-	//c.CreatePPM("chapter4.ppm");
-
-	
-	//Ray ray(Vec4::Point(0.0f, 0.0f, 5.0f), Vec4::Vec(0.0f, 0.0f, 1.0f));
-	//Sphere sphere(0);
-	//
-	//sphere.origin = Vec4::Point(0.0f, 0.0f, 0.0f);
-	//sphere.radius = 1.0f;
-	//
-	//Matrix4 mat2 = Matrix4::Identity();
-	//
-	//Matrix4 mat3 = mat2.Inverse();
-	//
-	//ray.Transform(mat3);
-	//
-	//sphere.Intersect(ray);
-	//
-	//Intersection hit;
-	//
-	//if (ray.intersections.FindAndGetHit(hit))
-	//{
-	//	// do stuff?
-	//}
-
-	//Ray ray(Vec4::Point(1.0f, 2.0f, 3.0f), Vec4::Vec(0.0f, 1.0f, 0.0f));
-	//Matrix4 translation = Matrix4::Translation(3.0f, 4.0f, 5.0f);
-	//Matrix4 scale = Matrix4::Scale(2.0f, 3.0f, 4.0f);
-	//Ray rayTransformed = ray.Transform(scale);
-
-
-	//Sphere s(0);
-	//
-	//s.AddTranformation(Matrix4::RotationZ(PI / sqrt(5.0f)));
-	//s.AddTranformation(Matrix4::Scale(1.0f, 0.5f, 1.0f));
-	//
-	//Vec4 normalTest = s.GetNormal(Vec4::Point(0.0f, -sqrt(2.0f) / 2.0f, sqrt(2.0f) / 2.0f));
-
-
-	//World world;
-	//Ray ray(Vec4::Point(0.0f, 0.0f, 0.75f), Vec4::Vec(0.0f, 0.0f, -1.0f));
-	//world.spheres[0].material.ambient = 1.0f;
-	//world.spheres[1].material.ambient = 1.0f;
-	//
-	//Colorf color = world.ColorAt(ray);
-
-	//world.pointLights[0] = PointLight(Vec4::Point(0.0f, 0.25f, 0.0f), Colorf{ 1.0f, 1.0f, 1.0f });
-	//
-	//Intersection i(0.5f, &world.spheres[1]);
-	//
-	//ComputeInfo compInfo;
-	//compInfo.Prepare(i, ray);
-	//
-	//Colorf color = world.ShadeHit(compInfo);
-
-	//world.Intersect(ray);
-	//Sphere s(0);
-	//s.material.color = Colorf{ 1.0f, 0.2f, 1.0f };
-	//
-	//PointLight light(Vec4::Point(-10.0f, 10.0f, -10.0), Colorf{ 1.0f, 1.0f, 1.0f });
-	//
-	//s.AddTranformation(Matrix4::Scale(0.5f, 1.0f, 1.0f));
-	//s.AddTranformation(Matrix4::RotationY(PI / 2.0f));
-	
-	
-	
-	
-	
-	//Canvas c(1600, 900);
-	//
-	//
-	//
-	//
-	//
-	//float viewBoardHalfWidth = 5.0f * (float)c.width / (float)c.height;
-	//float viewBoardHalfHeight = 5.0f;
-	//Vec4 viewBoardOrigin = Vec4::Point(0.0f, 0.0f, 10.0f);
-	//
-	//Vec4 rayOrigin = Vec4::Point(0.0f, 0.0f, -5.0f);
-	//
-	//World world;
-	//
-	//world.spheres[1].AddTranformation(Matrix4::Translation(-0.5f, 0.0f, -0.5f));
-	//world.spheres[1].material.color.g = 0.2f;
-	//
-	//
-	//
-	//
-	//int countHits = 0;
-	//
-	//for (int i = 0; i < c.width; i++)
-	//{
-	//	for (int j = 0; j < c.height; j++)
-	//	{
-	//		Vec4 viewBoardLoc = viewBoardOrigin + Vec4::Point((float)(((float)i - (float)(c.width / 2)) / (float)(c.width / 2)) * viewBoardHalfWidth, -(float)(((float)j - (float)(c.height / 2)) / (float)(c.height / 2)) * viewBoardHalfHeight, 0.0f);
-	//
-	//		Vec4 directionFromRayToViewBoard = viewBoardLoc - rayOrigin;
-	//
-	//		Ray ray(rayOrigin, directionFromRayToViewBoard.Normalize());
-	//
-	//		Colorf color = world.ColorAt(ray);
-	//
-	//		c.SetPixel(i, j, color);
-	//	}
-	//}
-	//
-	//
-	//c.CreatePPM("chapter7test.ppm");
-
-
-	//Vec4 from = Vec4::Point(0.0f, 0.0f, -5.0f);
-	//Vec4 to = Vec4::Point(0.0f, 0.0f, 0.0f);
-	//Vec4 up = Vec4::Vec(0.0f, 1.0f, 0.0f);
-
-	//Vec4 from = Vec4::Point(0.0f, 0.0f, 0.0f);
-	//Vec4 to = Vec4::Point(0.0f, 0.0f, -1.0f);
-	//Vec4 up = Vec4::Vec(0.0f, 1.0f, 0.0f);
-
-	//Camera c(201, 101, PI / 2.0f);
-	//c.viewTransform = Matrix4::RotationY(PI / 4.0f).MMult(c.viewTransform);
-	//c.viewTransform = Matrix4::Translation(0.0f, -2.0f, 5.0f).MMult(c.viewTransform);
-	//c.SetViewTransform(from, to, up);
-
-	//Ray r = c.RayAtPixel(0, 0);
-
-	//Canvas c(1800, 900);
-	//
-	//Camera camera(1800, 900, PI / 3.0f);
-	//camera.SetViewTransform(Vec4::Point(0.0f, 1.5f, -5.0f), Vec4::Point(0.0f, 1.0f, 0.0f), Vec4::Vec(0.0f, 1.0f, 0.0f));
-	//
-	//World world;
-	//
-	//
-	//for (int i = 0; i < c.width; i++)
-	//{
-	//	for (int j = 0; j < c.height; j++)
-	//	{
-	//		Ray ray = camera.RayAtPixel(i, j);
-	//
-	//		Colorf color = world.ColorAt(ray);
-	//
-	//		c.SetPixel(i, c.height - 1 - j , color);
-	//	}
-	//}
-	//
-	//
-	//c.CreatePPM("chapter8.ppm");
-
-
-	int testcheck = 0;
-
-	
-	mainCUDA();
-
-	
+	return 0;
 }
