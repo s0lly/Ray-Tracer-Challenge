@@ -17,6 +17,7 @@ struct Material
 	float diffuse;
 	float specular;
 	float shininess;
+	float reflective;
 	Colorf color;
 
 	// Functions
@@ -28,6 +29,7 @@ struct Material
 		diffuse = 0.9f;
 		specular = 0.9f;
 		shininess = 200.0f;
+		reflective = 0.0f;
 	}
 
 

@@ -8,14 +8,14 @@
 #define CUDA_CALLABLE_MEMBER
 #endif
 
-struct Sphere;
+struct Shape;
 
 
 struct Intersection
 {
 	// Data
 	float t;
-	Sphere *obj;
+	Shape *obj;
 
 
 	// Functions
@@ -25,7 +25,7 @@ struct Intersection
 		obj = nullptr;
 	}
 
-	CUDA_CALLABLE_MEMBER Intersection(float in_t, Sphere *in_obj)
+	CUDA_CALLABLE_MEMBER Intersection(float in_t, Shape *in_obj)
 	{
 		t = in_t;
 		obj = in_obj;
@@ -54,7 +54,7 @@ struct IntersectionList
 	//}
 
 
-	CUDA_CALLABLE_MEMBER void AddIntersection(float in_t, Sphere *in_obj)
+	CUDA_CALLABLE_MEMBER void AddIntersection(float in_t, Shape *in_obj)
 	{
 		list[currentNum] = Intersection(in_t, in_obj);
 		currentNum++;

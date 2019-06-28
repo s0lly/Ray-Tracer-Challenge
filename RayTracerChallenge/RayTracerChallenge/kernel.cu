@@ -47,6 +47,7 @@ __global__ void DrawScene(unsigned int *colorsCuda, World *world, Camera *camera
 
 int mainCUDA(unsigned int *colors, Camera &camera)
 {
+	cudaDeviceSetLimit(cudaLimitStackSize, 65536);
 
 	World world;
 

@@ -128,9 +128,31 @@ void Game::ComposeFrame()
 	//p[
 	//c.CreatePPM("chapter8.ppm");
 
-	
-	
-
+	//World world;
+	//
+	//for (int j = 0; j < gfx.ScreenHeight; j++)
+	//{
+	//	for (int i = 0; i < gfx.ScreenWidth; i++)
+	//	{
+	//		Ray ray = camera.RayAtPixel(i, j);
+	//
+	//		Colorf color = world.ColorAt(ray);
+	//
+	//		int r = (int)(color.r * 255.999f);
+	//		int g = (int)(color.g * 255.999f);
+	//		int b = (int)(color.b * 255.999f);
+	//
+	//		r = r > 255 ? 255 : r;
+	//		g = g > 255 ? 255 : g;
+	//		b = b > 255 ? 255 : b;
+	//
+	//		unsigned int dword;
+	//
+	//		dword = (((unsigned char)r << 16u) | ((unsigned char)g << 8u) | (unsigned char)b);
+	//
+	//		gfx.pSysBuffer[(gfx.ScreenHeight - 1 - j) * gfx.ScreenWidth + i] = dword;
+	//	}
+	//}
 
 
 	int testcheck = 0;
